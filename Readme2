@@ -1,0 +1,15 @@
+# Prime Move Theory - Mathematical Core
+
+**Work in progress: First formalization of 5-stage constitutive loop 
+that generates golden ratio φ from recursive "failed merges" and reproduces 
+standard QM Bell violations.**
+
+## Key Results (verified numerically):
+- Infinite prime move → φ = (1+√5)/2 fixed point [derivation]
+- 2-qubit simulation → CHSH max 2√2 ≈ 2.828 [code runs]
+- Parameter sweeps across 2400 points [dataset included]
+
+## Status
+v0.1 - Initial math + QM validation. Actively seeking collaborators/critics.
+
+[Live book] [Puzzle challenge] [Predictions for LiteBIRD/2035]
