@@ -1,0 +1,65 @@
+python
+import numpy as np
+import scipy.linalg as la
+
+# Pauli matrices
+sigma_x = np.array([[0, 1], [1, 0]], dtype=complex)
+sigma_y = np.array([[0, -1j], [1j, 0]], dtype=complex)
+sigma_z = np.array([[1, 0], [0, -1]], dtype=complex)
+
+# Two-qubit basis
+|00> = np.kron([1,0], [1,0])
+|11> = np.kron([0,1], [0,1])
+
+def split():
+    """Create Bell state |Φ⁺⟩ = (|00⟩ + |11⟩)/√2"""
+    return (|00> + |11>) / np.sqrt(2)
+
+def tension(state, theta):
+    """Apply tension rotation"""
+    H = np.kron(sigma_x, sigma_x) + np.kron(sigma_y, sigma_y)
+    U = la.expm(1j * theta * H)
+    return U @ state
+
+def failed_merge(state, epsilon):
+    """Mix with separable state |00⟩"""
+    rho_ent = state @ state.conj().T
+    rho_sep = |00> @ |00>.conj().T
+    return epsilon * rho_ent + (1 - epsilon) * rho_sep
+
+def scar_entropy(rho):
+    """Compute entanglement entropy"""
+    rho_A = np.trace(rho.reshape(2,2,2,2), axis1=1, axis2=3)
+    evals = np.linalg.eigvalsh(rho_A)
+    evals = evals[evals > 0]
+    return -np.sum(evals * np.log2(evals))
+
+def decay(rho, gamma):
+    """Amplitude damping"""
+    K0 = np.array([[1,0],[0,np.sqrt(1-gamma)]])
+    K1 = np.array([[0,np.sqrt(gamma)],[0,0]])
+    K0b = np.kron(K0, K0)
+    K1b = np.kron(K1, K1)
+    return K0b @ rho @ K0b.T + K1b @ rho @ K1b.T
+
+def compute_chsh(rho):
+    """Calculate CHSH violation"""
+    a1, a2 = sigma_z, sigma_x
+    b1 = (sigma_z + sigma_x)/np.sqrt(2)
+    b2 = (sigma_z - sigma_x)/np.sqrt(2)
+    
+    def E(a, b):
+        return np.real(np.trace(rho @ np.kron(a, b)))
+    
+    return E(a1,b1) + E(a1,b2) + E(a2,b1) - E(a2,b2)
+
+def prime_move_cycle(theta=np.pi/5, epsilon=1/np.sqrt(2), gamma=0.05):
+    """One complete Prime Move cycle"""
+    psi = |00>
+    psi = split()                 # Split
+    psi = tension(psi, theta)     # Tension
+    rho = failed_merge(psi, epsilon)  # Failed Merge
+    S = scar_entropy(rho)         # Scar (measure)
+    rho = decay(rho, gamma)       # Decay
+    return rho, S
+```
